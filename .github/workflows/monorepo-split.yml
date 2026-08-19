@@ -37,6 +37,6 @@ jobs:
       - name: Push to ${{ matrix.package.split_repository }}
         run: |
           git push \
-            "https://x-access-token:${{ secrets.GH_ACCESS_TOKEN }}@github.com/your-org/${{ matrix.package.split_repository }}.git" \
+            "https://x-access-token:${{ secrets.GH_ACCESS_TOKEN }}@github.com/flibouche/${{ matrix.package.split_repository }}.git" \
             split-${{ matrix.package.local_path }}:main \
             --force
