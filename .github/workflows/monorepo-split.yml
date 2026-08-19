@@ -1,0 +1,42 @@
+name: monorepo-split
+
+on:
+  push:
+    branches: [main]
+    tags: ['*']
+
+permissions:
+  contents: read
+
+jobs:
+  split-monorepo:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - local_path: core
+            split_repository: core-test-repo
+          - local_path: blog
+            split_repository: blog-test-repo
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git identity
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Split ${{ matrix.package.local_path }}
+        run: |
+          git subtree split --prefix=packages/${{ matrix.package.local_path }} -b split-${{ matrix.package.local_path }}
+
+      - name: Push to ${{ matrix.package.split_repository }}
+        run: |
+          git push \
+            "https://x-access-token:${{ secrets.GH_ACCESS_TOKEN }}@github.com/your-org/${{ matrix.package.split_repository }}.git" \
+            split-${{ matrix.package.local_path }}:main \
+            --force
